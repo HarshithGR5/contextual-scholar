@@ -1,0 +1,628 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧠 Contextual Scholar - AI Research Assistant</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            color: #333;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+
+        .header {
+            text-align: center;
+            color: white;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            margin-bottom: 30px;
+        }
+
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            transition: transform 0.3s ease;
+        }
+
+        .card:hover {
+            transform: translateY(-5px);
+        }
+
+        .card h2 {
+            color: #4a5568;
+            margin-bottom: 20px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .upload-area {
+            border: 3px dashed #cbd5e0;
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            border-color: #667eea;
+            background-color: #f7fafc;
+        }
+
+        .upload-area.dragover {
+            border-color: #667eea;
+            background-color: #e6fffa;
+        }
+
+        .upload-icon {
+            font-size: 3rem;
+            color: #a0aec0;
+            margin-bottom: 15px;
+        }
+
+        .upload-text {
+            color: #4a5568;
+            font-size: 1.1rem;
+        }
+
+        .file-input {
+            display: none;
+        }
+
+        .query-section {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+        }
+
+        .input-group {
+            position: relative;
+        }
+
+        .query-input {
+            width: 100%;
+            padding: 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: border-color 0.3s ease;
+        }
+
+        .query-input:focus {
+            outline: none;
+            border-color: #667eea;
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            border-radius: 10px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none;
+        }
+
+        .results-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            margin-bottom: 30px;
+        }
+
+        .result-card {
+            background: #f8f9fa;
+            border-left: 4px solid #667eea;
+            padding: 20px;
+            margin: 15px 0;
+            border-radius: 0 10px 10px 0;
+        }
+
+        .result-question {
+            font-weight: 600;
+            color: #2d3748;
+            margin-bottom: 10px;
+        }
+
+        .result-answer {
+            color: #4a5568;
+            line-height: 1.6;
+            margin-bottom: 15px;
+        }
+
+        .result-sources {
+            font-size: 0.9rem;
+            color: #718096;
+        }
+
+        .loading {
+            display: none;
+            text-align: center;
+            padding: 20px;
+        }
+
+        .spinner {
+            border: 3px solid #e2e8f0;
+            border-top: 3px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 15px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        .status-section {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .status-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-icon {
+            width: 20px;
+            text-align: center;
+        }
+
+        .success { color: #48bb78; }
+        .warning { color: #ed8936; }
+        .error { color: #f56565; }
+
+        .uploaded-files {
+            margin-top: 20px;
+        }
+
+        .file-item {
+            background: #f0f4f8;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .sample-queries {
+            margin-top: 20px;
+        }
+
+        .sample-query {
+            background: #e6fffa;
+            padding: 10px 15px;
+            margin: 5px 0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+
+        .sample-query:hover {
+            background: #b2f5ea;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1><i class="fas fa-brain"></i> Contextual Scholar</h1>
+            <p>AI-Powered Research Assistant with Knowledge Graphs</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Upload Section -->
+            <div class="card">
+                <h2><i class="fas fa-upload"></i> Upload Documents</h2>
+                <div class="upload-area" id="uploadArea">
+                    <div class="upload-icon">
+                        <i class="fas fa-file-pdf"></i>
+                    </div>
+                    <div class="upload-text">
+                        <strong>Click to upload</strong> or drag and drop PDF files here
+                    </div>
+                    <input type="file" id="fileInput" class="file-input" multiple accept=".pdf">
+                </div>
+                
+                <div class="uploaded-files" id="uploadedFiles">
+                    <h3>📁 Uploaded Documents</h3>
+                    <div id="fileList"></div>
+                </div>
+            </div>
+
+            <!-- Query Section -->
+            <div class="card">
+                <h2><i class="fas fa-search"></i> Ask Questions</h2>
+                <div class="query-section">
+                    <div class="input-group">
+                        <textarea 
+                            class="query-input" 
+                            id="queryInput" 
+                            placeholder="Ask a question about your documents..."
+                            rows="3"
+                        ></textarea>
+                    </div>
+                    <button class="btn" id="queryBtn">
+                        <i class="fas fa-paper-plane"></i>
+                        Ask Question
+                    </button>
+                </div>
+
+                <div class="sample-queries">
+                    <h3>💡 Sample Questions</h3>
+                    <div class="sample-query" onclick="setQuery('What are the main topics discussed in the documents?')">
+                        What are the main topics discussed in the documents?
+                    </div>
+                    <div class="sample-query" onclick="setQuery('Summarize the key findings from the research.')">
+                        Summarize the key findings from the research.
+                    </div>
+                    <div class="sample-query" onclick="setQuery('What methodology was used in the study?')">
+                        What methodology was used in the study?
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Results Section -->
+        <div class="results-section" id="resultsSection" style="display: none;">
+            <h2><i class="fas fa-lightbulb"></i> Results</h2>
+            <div class="loading" id="loading">
+                <div class="spinner"></div>
+                <p>Analyzing your question...</p>
+            </div>
+            <div id="results"></div>
+        </div>
+
+        <!-- Status Section -->
+        <div class="status-section">
+            <h2><i class="fas fa-info-circle"></i> System Status</h2>
+            <div id="statusList">
+                <div class="status-item">
+                    <i class="fas fa-circle-notch fa-spin status-icon"></i>
+                    <span>Checking system status...</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '';
+        let uploadedDocuments = [];
+
+        // DOM Elements
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const fileList = document.getElementById('fileList');
+        const queryInput = document.getElementById('queryInput');
+        const queryBtn = document.getElementById('queryBtn');
+        const resultsSection = document.getElementById('resultsSection');
+        const loading = document.getElementById('loading');
+        const results = document.getElementById('results');
+        const statusList = document.getElementById('statusList');
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', function() {
+            checkSystemStatus();
+            loadUploadedDocuments();
+            setupEventListeners();
+        });
+
+        function setupEventListeners() {
+            // Upload area events
+            uploadArea.addEventListener('click', () => fileInput.click());
+            uploadArea.addEventListener('dragover', handleDragOver);
+            uploadArea.addEventListener('dragleave', handleDragLeave);
+            uploadArea.addEventListener('drop', handleDrop);
+            
+            fileInput.addEventListener('change', handleFileSelect);
+            queryBtn.addEventListener('click', handleQuery);
+            queryInput.addEventListener('keypress', function(e) {
+                if (e.key === 'Enter' && e.ctrlKey) {
+                    handleQuery();
+                }
+            });
+        }
+
+        function handleDragOver(e) {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        }
+
+        function handleDragLeave(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+        }
+
+        function handleDrop(e) {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            uploadFiles(files);
+        }
+
+        function handleFileSelect(e) {
+            const files = e.target.files;
+            uploadFiles(files);
+        }
+
+        async function uploadFiles(files) {
+            for (let file of files) {
+                if (file.type === 'application/pdf') {
+                    await uploadFile(file);
+                } else {
+                    alert(`${file.name} is not a PDF file. Please upload PDF files only.`);
+                }
+            }
+            loadUploadedDocuments();
+        }
+
+        async function uploadFile(file) {
+            const formData = new FormData();
+            formData.append('file', file);
+
+            try {
+                const response = await fetch(`${API_BASE}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    showNotification(`✅ ${file.name} uploaded successfully!`, 'success');
+                } else {
+                    const error = await response.text();
+                    showNotification(`❌ Failed to upload ${file.name}: ${error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`❌ Error uploading ${file.name}: ${error.message}`, 'error');
+            }
+        }
+
+        async function loadUploadedDocuments() {
+            try {
+                const response = await fetch(`${API_BASE}/documents`);
+                if (response.ok) {
+                    const data = await response.json();
+                    uploadedDocuments = data.documents || [];
+                    displayUploadedFiles();
+                }
+            } catch (error) {
+                console.error('Error loading documents:', error);
+            }
+        }
+
+        function displayUploadedFiles() {
+            if (uploadedDocuments.length === 0) {
+                fileList.innerHTML = '<p style="color: #718096; font-style: italic;">No documents uploaded yet</p>';
+                return;
+            }
+
+            fileList.innerHTML = uploadedDocuments.map(doc => `
+                <div class="file-item">
+                    <i class="fas fa-file-pdf" style="color: #e53e3e;"></i>
+                    <span>${doc}</span>
+                </div>
+            `).join('');
+        }
+
+        async function handleQuery() {
+            const question = queryInput.value.trim();
+            if (!question) {
+                alert('Please enter a question');
+                return;
+            }
+
+            if (uploadedDocuments.length === 0) {
+                alert('Please upload some documents first');
+                return;
+            }
+
+            queryBtn.disabled = true;
+            resultsSection.style.display = 'block';
+            loading.style.display = 'block';
+            results.innerHTML = '';
+
+            try {
+                const response = await fetch(`${API_BASE}/query`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ question })
+                });
+
+                if (response.ok) {
+                    const result = await response.json();
+                    displayResults(question, result);
+                } else {
+                    const error = await response.text();
+                    showNotification(`❌ Query failed: ${error}`, 'error');
+                }
+            } catch (error) {
+                showNotification(`❌ Error: ${error.message}`, 'error');
+            } finally {
+                loading.style.display = 'none';
+                queryBtn.disabled = false;
+            }
+        }
+
+        function displayResults(question, result) {
+            const resultHtml = `
+                <div class="result-card">
+                    <div class="result-question">
+                        <i class="fas fa-question-circle"></i> ${question}
+                    </div>
+                    <div class="result-answer">
+                        <strong>Answer:</strong><br>
+                        ${result.answer || 'No answer generated'}
+                    </div>
+                    <div class="result-sources">
+                        <i class="fas fa-book"></i> 
+                        Sources: ${(result.sources || []).length} documents • 
+                        Entities: ${(result.entities || []).length} • 
+                        Processing time: ${result.processing_time || 'N/A'}
+                    </div>
+                </div>
+            `;
+            results.innerHTML = resultHtml;
+        }
+
+        async function checkSystemStatus() {
+            const statusItems = [
+                { name: 'API Server', endpoint: '/health' },
+                { name: 'Vector Store', key: 'vector_store' },
+                { name: 'LLM Service', key: 'llm_service' },
+                { name: 'Knowledge Graph', key: 'knowledge_graph' }
+            ];
+
+            try {
+                const response = await fetch(`${API_BASE}/health`);
+                if (response.ok) {
+                    const health = await response.json();
+                    
+                    statusList.innerHTML = statusItems.map(item => {
+                        let status, icon, className;
+                        
+                        if (item.endpoint) {
+                            status = 'Connected';
+                            icon = 'fas fa-check-circle';
+                            className = 'success';
+                        } else {
+                            const serviceStatus = health.services?.[item.key];
+                            if (serviceStatus === 'healthy') {
+                                status = 'Healthy';
+                                icon = 'fas fa-check-circle';
+                                className = 'success';
+                            } else if (serviceStatus === 'degraded') {
+                                status = 'Degraded';
+                                icon = 'fas fa-exclamation-triangle';
+                                className = 'warning';
+                            } else {
+                                status = 'Unavailable';
+                                icon = 'fas fa-times-circle';
+                                className = 'error';
+                            }
+                        }
+
+                        return `
+                            <div class="status-item">
+                                <i class="${icon} status-icon ${className}"></i>
+                                <span>${item.name}: ${status}</span>
+                            </div>
+                        `;
+                    }).join('');
+                } else {
+                    throw new Error('Server not responding');
+                }
+            } catch (error) {
+                statusList.innerHTML = `
+                    <div class="status-item">
+                        <i class="fas fa-times-circle status-icon error"></i>
+                        <span>Unable to connect to server. Please start the server first.</span>
+                    </div>
+                `;
+            }
+        }
+
+        function setQuery(query) {
+            queryInput.value = query;
+            queryInput.focus();
+        }
+
+        function showNotification(message, type) {
+            // Simple notification - you can enhance this
+            const notification = document.createElement('div');
+            notification.style.cssText = `
+                position: fixed;
+                top: 20px;
+                right: 20px;
+                padding: 15px 20px;
+                background: ${type === 'success' ? '#48bb78' : '#f56565'};
+                color: white;
+                border-radius: 10px;
+                z-index: 1000;
+                box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            `;
+            notification.textContent = message;
+            document.body.appendChild(notification);
+
+            setTimeout(() => {
+                notification.remove();
+            }, 5000);
+        }
+
+        // Refresh status every 30 seconds
+        setInterval(checkSystemStatus, 30000);
+    </script>
+</body>
+</html>
